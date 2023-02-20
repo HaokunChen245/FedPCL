@@ -132,8 +132,7 @@ def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_gro
             summary_writer.add_scalar('Train/Loss/user' + str(idx), loss, round)
 
         # update global weights
-        local_weights_list = average_weights(local_weights)
-        global_model = copy.deepcopy(local_model_list[0])
+        local_weights_list = average_weights(local_weights)        
         global_model.load_state_dict(local_weights_list[0], strict=True)
 
         loss_avg = sum(local_losses) / len(local_losses)
