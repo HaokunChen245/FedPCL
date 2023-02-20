@@ -209,7 +209,7 @@ def resnet18(pretrained=False, ds=None, **kwargs):
     model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
     if pretrained:
         if ds:
-            model_path = './lib/models/weights/'+ds+'-net/model_best.pth.tar'
+            model_path = args.data_dir + 'models/weights/'+ds+'-net/model_best.pth.tar'
             checkpoint = torch.load(model_path)
             model.load_state_dict(checkpoint['state_dict'], strict=False)
         else:
