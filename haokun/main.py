@@ -116,13 +116,11 @@ def main(args):
         local_model_list.append(models)
 
     print(args)
-    summary_writer = SummaryWriter('./tensorboard/' + args.dataset + '_' + args.alg + '_' + str(len(backbone_list)) + 'bb_' + str(args.rounds) + 'r_' + str(args.num_users) + 'u_'+ str(args.train_ep) + 'ep')
-    if args.alg == 'fedpcl':
-        acc_mtx = FedPCL(args, summary_writer, train_dataset_list, test_dataset_list, user_groups, user_groups_test, backbone_list, models)
-    elif args.alg == 'fedavg':
-        acc_mtx = FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_groups, user_groups_test, backbone_list, models)
+    summary_writer = SummaryWriter('./tensorboard/' + args.dataset + '_' + args.alg + '_' + str(len(models)) + 'bb_' + str(args.rounds) + 'r_' + str(args.num_users) + 'u_'+ str(args.train_ep) + 'ep')
+    if args.alg == 'fedavg':
+        acc_mtx = FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_groups, user_groups_test, local_model_list)
     elif args.alg == 'local':
-        acc_mtx = Local(args, summary_writer, train_dataset_list, test_dataset_list, user_groups, user_groups_test, backbone_list, local_model_list)
+        acc_mtx = Local(args, summary_writer, train_dataset_list, test_dataset_list, user_groups, user_groups_test, local_model_list)
 
     return acc_mtx
 
