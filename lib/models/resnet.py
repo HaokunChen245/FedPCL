@@ -103,10 +103,10 @@ class ResNetWrapper(nn.Module):
         self.net = net
         self.net.eval()
         for p in self.net.parameters():
-            p.requires_grad = False
-
-        for p in self.net.fc.parameters():
             p.requires_grad = True
+
+        # for p in self.net.fc.parameters():
+        #     p.requires_grad = True
 
         # if isinstance(self.net, ResNet):
         #     self.adapter0 = nn.Conv2d(64, 64, kernel_size=1, stride=1, padding=0)
