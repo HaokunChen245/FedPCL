@@ -113,9 +113,7 @@ def main(args):
                 VGG=vgg11(pretrained=True)
                 backbone_list = [MLP, AlexNet, VGG]
                 local_model = ProjandDeci(4352, 256, 10)
-        local_model.to(args.device)
-        local_model.train()
-        local_model_list.append(local_model)
+        local_model_list.append(models)
 
     print(args)
     summary_writer = SummaryWriter('./tensorboard/' + args.dataset + '_' + args.alg + '_' + str(len(backbone_list)) + 'bb_' + str(args.rounds) + 'r_' + str(args.num_users) + 'u_'+ str(args.train_ep) + 'ep')
