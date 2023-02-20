@@ -179,3 +179,27 @@ class DomainNetDataset(Dataset):
             image = self.transform(image)
 
         return image, label
+
+class DatasetSplit(Dataset):
+    """An abstract Dataset class wrapped around Pytorch Dataset class.
+    """
+
+    def __init__(self, dataset, idxs):
+        self.dataset = dataset
+        self.idxs = [int(i) for i in idxs]
+
+    def __len__(self):
+        return len(self.idxs)
+
+    def __getitem__(self, item):
+        image, label = self.dataset[self.idxs[item]]
+        if isinstance(image, torch.Tensor):
+            image = image.clone().detach()
+        else:
+            # image = torch.tensor(image)
+            image = image
+        if isinstance(label, torch.Tensor):
+            label = label.clone().detach()
+        else:
+            label = torch.tensor(label)
+        return image, label

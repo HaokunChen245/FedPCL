@@ -97,6 +97,36 @@ class Bottleneck(nn.Module):
 
         return out
 
+class MFAWrapper(nn.Module):
+    def __init__(self, net):
+        super(MFAWrapper, self).__init__()
+        self.net = net
+        self.net.eval()
+        for p in self.net.parameters():
+            p.requires_grad = True
+        if isinstance(self.net, ResNet):
+            self.adapter0 = nn.Conv2d(64, 64, kernel_size=1, stride=1, padding=0)
+            self.adapter1 = nn.Conv2d(128, 128, kernel_size=1, stride=1, padding=0)
+            self.adapter2 = nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0)
+            self.adapter3 = nn.Conv2d(512, 512, kernel_size=1, stride=1, padding=0)
+                    
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+
+        x = self.avgpool(x)
+        # x = x.view(x1.size(0), -1)
+        # x = self.fc(x)
+        x = F.normalize(x, dim=-1)
+
+        return torch.reshape(x, [x.shape[0], x.shape[1]*x.shape[2]*x.shape[3]])
 
 class ResNet(nn.Module):
 
@@ -148,7 +178,7 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, x, get_features=False):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -160,11 +190,14 @@ class ResNet(nn.Module):
         x = self.layer4(x)
 
         x = self.avgpool(x)
-        # x = x.view(x1.size(0), -1)
-        # x = self.fc(x)
-        x = F.normalize(x, dim=-1)
+        x = x.view(x.size(0), -1)
+        o = self.fc(x)
+        # x = F.normalize(x, dim=-1)
 
-        return torch.reshape(x, [x.shape[0], x.shape[1]*x.shape[2]*x.shape[3]])
+        if get_features:
+            return o, x
+
+        return o
 
 
 def resnet18(pretrained=False, ds=None, **kwargs):

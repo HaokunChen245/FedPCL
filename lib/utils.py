@@ -32,6 +32,22 @@ trans_cifar100_val = transforms.Compose([transforms.ToTensor(),
                                          transforms.Normalize(mean=[0.507, 0.487, 0.441],
                                                               std=[0.267, 0.256, 0.276])])
 
+def _random_seeder(seed):
+    """Fix randomness"""
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    if args.device == 'cuda':
+        torch.cuda.set_device('cuda')
+        torch.cuda.manual_seed(seed)
+        torch.manual_seed(seed)
+    else:
+        torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+
 def record_net_data_stats(y_train, net_dataidx_map):
 
     net_cls_counts = {}
