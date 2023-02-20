@@ -140,7 +140,7 @@ class ResNetWrapper(nn.Module):
         if f3_q: 
             f3 = f3_q
 
-        x = self.net.layer4(x)
+        x = self.net.layer4(f3)
         x = self.net.avgpool(x)
         x = x.view(x.size(0), -1)
         o = self.net.fc(x)
