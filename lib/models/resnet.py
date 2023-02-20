@@ -103,19 +103,51 @@ class ResNetWrapper(nn.Module):
         self.net = net
         self.net.eval()
         for p in self.net.parameters():
+            p.requires_grad = False
+
+        for p in self.net.fc.parameters():
             p.requires_grad = True
 
-        # for p in self.net.fc.parameters():
-        #     p.requires_grad = True
-
-        # if isinstance(self.net, ResNet):
-        #     self.adapter0 = nn.Conv2d(64, 64, kernel_size=1, stride=1, padding=0)
-        #     self.adapter1 = nn.Conv2d(128, 128, kernel_size=1, stride=1, padding=0)
-        #     self.adapter2 = nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0)
-        #     self.adapter3 = nn.Conv2d(512, 512, kernel_size=1, stride=1, padding=0)
+        self.adapters = []
+        for i in range(4):
+            self.adapters.append(nn.Conv2d(64*(i+1), 64*(i+1), kernel_size=1, stride=1, padding=0))
+        for m in self.adapters:
+            for p in m.parameters():
+                p.requries_grad=True
                     
-    def forward(self, x):
-        return self.net(x)
+    def forward(self, x, f0_q=None, f1_q=None, f2_q=None, f3_q=None, get_features=False):
+        x = self.net.conv1(x)
+        x = self.net.bn1(x)
+        x = self.net.relu(x)
+        f0 = self.net.maxpool(x)
+        f0 = self.adapters[0](f0)
+        if f0_q: 
+            f0 = f0_q
+
+        f1 = self.net.layer1(f0)
+        f1 = self.adapters[1](f1)
+        if f1_q: 
+            f1 = f1_q
+
+        f2 = self.net.layer2(f1)
+        f2 = self.adapters[2](f2)
+        if f2_q: 
+            f2 = f2_q
+
+        f3 = self.net.layer3(f2)
+        f3 = self.adapters[3](f3)
+        if f3_q: 
+            f3 = f3_q
+
+        x = self.net.layer4(x)
+        x = self.net.avgpool(x)
+        x = x.view(x.size(0), -1)
+        o = self.net.fc(x)
+
+        if get_features:
+            return o, f0, f1, f2, f3
+        else:
+            return o
 
 class ResNet(nn.Module):
 
