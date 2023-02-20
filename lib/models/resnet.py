@@ -109,9 +109,9 @@ class ResNetWrapper(nn.Module):
             p.requires_grad = True
 
         for name, m in self.net.named_modules():
-            print(name)
-            for p in m.parameters():
-                p.requries_grad=True
+            if 'downstream' in name:
+                for p in m.parameters():
+                    p.requries_grad=True
                     
     def forward(self, x, f0_q=None, f1_q=None, f2_q=None, f3_q=None, get_features=False):
         x = self.net.conv1(x)
