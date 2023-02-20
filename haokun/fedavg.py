@@ -7,6 +7,7 @@ import time, random
 import numpy as np
 from tqdm import tqdm
 import torch
+import torch.nn as nn
 from tensorboardX import SummaryWriter
 from pathlib import Path
 from datetime import datetime
