@@ -22,6 +22,7 @@ from models.vision_transformer import vit_tiny_patch16_224, vit_small_patch16_22
 from options import args_parser
 from models.multibackbone import alexnet, vgg11, mlp_m
 from data_utils import DatasetSplit
+from utils import average_weights
 
 class LocalUpdate(object):
     def __init__(self, args, dataset, idxs):
