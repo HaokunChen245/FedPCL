@@ -40,7 +40,7 @@ class LocalUpdate(object):
 
         return trainloader
 
-    def update_weights(self, idx, backbone_list, model, global_round):
+    def update_weights(self, idx, model, global_round):
         # Set mode to train model
         model.train()
         epoch_loss = []
@@ -91,7 +91,7 @@ class LocalTest(object):
                                  batch_size=args.test_bs, shuffle=False)
         return testloader
 
-    def test_inference(self, args, backbone_list, model):
+    def test_inference(self, args, model):
         device = args.device
         model.eval().to(args.device)
         loss, total, correct = 0.0, 0.0, 0.0
@@ -142,7 +142,7 @@ def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_gro
                 for idx in range(args.num_users):
                     print('Test on user {:d}'.format(idx))
                     local_test = LocalTest(args=args, dataset=test_dataset_list[idx], idxs=user_groups_test[idx])
-                    acc, loss = local_test.test_inference(args, backbone_list, global_model)
+                    acc, loss = local_test.test_inference(args, global_model)
                     print('| User: {} | Test Acc: {:.5f} | Test Loss: {:.5f}'.format(idx, acc, loss))
                     summary_writer.add_scalar('Test/Acc/user' + str(idx), acc, round)
 
@@ -152,7 +152,7 @@ def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_gro
         for idx in range(args.num_users):
             print('Test on user {:d}'.format(idx))
             local_test = LocalTest(args=args, dataset=test_dataset_list[idx], idxs=user_groups_test[idx])
-            acc, loss = local_test.test_inference(idx, args, backbone_list, global_model)
+            acc, loss = local_test.test_inference(idx, args, global_model)
             acc_mtx[idx] = acc
             loss_mtx[idx] = loss
 
