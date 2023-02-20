@@ -31,7 +31,7 @@ def args_parser():
     # data arguments
     parser.add_argument('--dataset', type=str, default='digit', help="name of dataset, e.g. digit")
     parser.add_argument('--percent', type=float, default=1, help="percentage of dataset to train")
-    parser.add_argument('--data_dir', type=str, default='./data/', help="name of dataset, default: './data/'")
+    parser.add_argument('--data_dir', type=str, default='/home/chen_h/datasets/data_fedpcl/', help="name of dataset, default: './data/'")
     parser.add_argument('--train_size', type=int, default=10, help="number of training samples in total")
     parser.add_argument('--test_size', type=int, default=100, help="num of test samples per dataset")
     parser.add_argument('--num_classes', type=int, default=10, help="number of classes")

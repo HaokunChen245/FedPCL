@@ -212,7 +212,7 @@ def prepare_data_digits(num_users, args):
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
 
-    data_root = './data/'
+    data_root = args.data_dir
 
     # MNIST
     mnist_trainset = data_utils.DigitsDataset(args=args, data_path=data_root + "digit/MNIST", channels=1, train=True, transform=TwoCropTransform(transform_mnist))
