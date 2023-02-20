@@ -81,9 +81,9 @@ def main(args):
 
     # load backbone
     if args.model == 'cnn':
-        resnet_quickdraw = resnet18(pretrained=True, ds='quickdraw')
-        resnet_birds = resnet18(pretrained=True, ds='birds')
-        resnet_aircraft = resnet18(pretrained=True, ds='aircraft')
+        resnet_quickdraw = resnet18(pretrained=True, ds='quickdraw', data_dir=args.data_dir)
+        resnet_birds = resnet18(pretrained=True, ds='birds', data_dir=args.data_dir)
+        resnet_aircraft = resnet18(pretrained=True, ds='aircraft', data_dir=args.data_dir)
     elif args.model == 'vit':
         vit_t = vit_tiny_patch16_224(pretrained=False)
         vit_t.load_pretrained(args.data_dir + 'models/weights/Ti_16-i1k-300ep-lr_0.001-aug_light0-wd_0.1-do_0.0-sd_0.0.npz')

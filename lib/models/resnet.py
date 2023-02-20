@@ -200,7 +200,7 @@ class ResNet(nn.Module):
         return o
 
 
-def resnet18(pretrained=False, ds=None, **kwargs):
+def resnet18(pretrained=False, ds=None, data_dir=None, **kwargs):
     """Constructs a ResNet-18 model.
 
     Args:
@@ -209,7 +209,7 @@ def resnet18(pretrained=False, ds=None, **kwargs):
     model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
     if pretrained:
         if ds:
-            model_path = args.data_dir + 'models/weights/'+ds+'-net/model_best.pth.tar'
+            model_path = data_dir + 'models/weights/'+ds+'-net/model_best.pth.tar'
             checkpoint = torch.load(model_path)
             model.load_state_dict(checkpoint['state_dict'], strict=False)
         else:
