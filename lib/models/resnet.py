@@ -110,7 +110,7 @@ class ResNetWrapper(nn.Module):
 
         self.adapters = []
         for i in range(4):
-            self.adapters.append(nn.Conv2d(64*(i+1), 64*(i+1), kernel_size=1, stride=1, padding=0))
+            self.adapters.append(nn.Conv2d(64*(i+1), 64*(i+1), kernel_size=1, stride=1, padding=0).to('cuda'))
         for m in self.adapters:
             for p in m.parameters():
                 p.requries_grad=True
