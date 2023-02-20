@@ -100,10 +100,7 @@ class LocalTest(object):
         # test (only use local model)
         for batch_idx, (images, labels) in enumerate(self.testloader):
             images, labels = images.to(device), labels.to(device)
-
-            logits = model(reps)
-
-            # prediction
+            logits = model(images)
             _, pred_labels = torch.max(logits, 1)
             pred_labels = pred_labels.view(-1)
             correct += torch.sum(torch.eq(pred_labels, labels)).item()
