@@ -16,7 +16,7 @@ lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
 if str(lib_dir) not in sys.path:
     sys.path.insert(0, str(lib_dir))
 
-from models.resnet import resnet18
+from models.resnet import ResNetWrapper
 from models.vision_transformer import vit_tiny_patch16_224, vit_small_patch16_224, vit_base_patch16_224
 from options import args_parser
 from models.multibackbone import alexnet, vgg11, mlp_m
