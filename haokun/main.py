@@ -97,9 +97,9 @@ def main(args):
     for _ in range(args.num_users):
         if args.num_bb == 1:
             if args.model == 'cnn':
-                models = [resnet_quickdraw]
+                models = resnet_quickdraw
             elif args.model == 'vit':
-                models = [vit_s]
+                models = vit_s
         elif args.num_bb == 3:
             if args.model == 'cnn':
                 backbone_list = [resnet_quickdraw, resnet_aircraft, resnet_birds]
