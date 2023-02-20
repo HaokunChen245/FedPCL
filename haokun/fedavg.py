@@ -121,7 +121,7 @@ def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_gro
         print(f'\n | Global Training Round : {round} |\n')
         print(datetime.now())
 
-        for idx in idxs_users:
+        for idx in range(args.num_users):
             local_node = LocalUpdate(args=args, dataset=train_dataset_list[idx],idxs=user_groups[idx])
             w, loss = local_node.update_weights(idx, model=copy.deepcopy(global_model), global_round=round)
             local_weights.append(copy.deepcopy(w))
@@ -136,7 +136,7 @@ def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_gro
         loss_avg = sum(local_losses) / len(local_losses)
         train_loss.append(loss_avg)
 
-        if round % 5 == 0:
+        if round % 10 == 0:
             with torch.no_grad():
                 for idx in range(args.num_users):
                     print('Test on user {:d}'.format(idx))
