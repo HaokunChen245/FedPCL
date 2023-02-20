@@ -86,11 +86,11 @@ def main(args):
         resnet_aircraft = resnet18(pretrained=True, ds='aircraft', data_dir=args.data_dir)
     elif args.model == 'vit':
         vit_t = vit_tiny_patch16_224(pretrained=False)
-        vit_t.load_pretrained(args.data_dir + 'models/weights/Ti_16-i1k-300ep-lr_0.001-aug_light0-wd_0.1-do_0.0-sd_0.0.npz')
+        vit_t.load_pretrained(args.data_dir + 'weights/Ti_16-i1k-300ep-lr_0.001-aug_light0-wd_0.1-do_0.0-sd_0.0.npz')
         vit_s = vit_small_patch16_224(pretrained=False)
-        vit_s.load_pretrained(args.data_dir + 'models/weights/S_16-i1k-300ep-lr_0.001-aug_medium2-wd_0.1-do_0.0-sd_0.0.npz')
+        vit_s.load_pretrained(args.data_dir + 'weights/S_16-i1k-300ep-lr_0.001-aug_medium2-wd_0.1-do_0.0-sd_0.0.npz')
         vit_b = vit_base_patch16_224(pretrained=False)
-        vit_b.load_pretrained(args.data_dir + 'models/weights/B_16-i1k-300ep-lr_0.001-aug_medium2-wd_0.1-do_0.1-sd_0.1.npz')
+        vit_b.load_pretrained(args.data_dir + 'weights/B_16-i1k-300ep-lr_0.001-aug_medium2-wd_0.1-do_0.1-sd_0.1.npz')
 
     # model initialization
     local_model_list = []
