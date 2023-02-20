@@ -3,6 +3,7 @@
 # Python version: 3.6
 
 import copy
+import random
 import torch
 from torchvision import datasets, transforms
 from sampling import mnist_iid, mnist_noniid, mnist_noniid_unequal, mnist_noniid_lt
