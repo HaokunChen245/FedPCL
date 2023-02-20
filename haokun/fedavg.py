@@ -101,6 +101,7 @@ class LocalTest(object):
         for batch_idx, (images, labels) in enumerate(self.testloader):
             images, labels = images.to(device), labels.to(device)
             logits = model(images)
+            loss += self.criterion(logits, labels)
             _, pred_labels = torch.max(logits, 1)
             pred_labels = pred_labels.view(-1)
             correct += torch.sum(torch.eq(pred_labels, labels)).item()
@@ -150,7 +151,8 @@ def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_gro
         for idx in range(args.num_users):
             print('Test on user {:d}'.format(idx))
             local_test = LocalTest(args=args, dataset=test_dataset_list[idx], idxs=user_groups_test[idx])
-            acc, loss = local_test.test_inference(idx, args, global_model)
+            acc, loss = local_test.test_inference(args, global_model)
+            print('| User: {} | Test Acc: {:.5f} | Test Loss: {:.5f}'.format(idx, acc, loss))
             acc_mtx[idx] = acc
             loss_mtx[idx] = loss
 
