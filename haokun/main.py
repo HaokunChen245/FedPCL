@@ -10,7 +10,7 @@ import torch
 from tensorboardX import SummaryWriter
 from pathlib import Path
 from datetime import datetime
-from .fedavg import FedAvg
+from fedavg import FedAvg
 
 lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
 if str(lib_dir) not in sys.path:
