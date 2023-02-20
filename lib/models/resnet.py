@@ -111,7 +111,11 @@ class ResNetWrapper(nn.Module):
         self.adapters = []
         dims = [64, 64, 128, 256]
         for i in range(4):
-            self.adapters.append(nn.Conv2d(dims[i], dims[i], kernel_size=1, stride=1, padding=0).to('cuda'))
+            self.adapters.append(nn.Sequential(
+                nn.Conv2d(dims[i], dims[i], kernel_size=1, stride=1, padding=0).to('cuda'),
+                nn.BatchNorm2d(dims[i]),
+                nn.relu(inplace=True)
+            ))
         for m in self.adapters:
             for p in m.parameters():
                 p.requries_grad=True
@@ -121,22 +125,22 @@ class ResNetWrapper(nn.Module):
         x = self.net.bn1(x)
         x = self.net.relu(x)
         f0 = self.net.maxpool(x)
-        f0 = F.relu(self.adapters[0](f0))
+        f0 = self.adapters[0](f0)
         if f0_q: 
             f0 = f0_q
 
         f1 = self.net.layer1(f0)
-        f1 = F.relu(self.adapters[1](f1))
+        f1 = self.adapters[1](f1)
         if f1_q: 
             f1 = f1_q
 
         f2 = self.net.layer2(f1)
-        f2 = F.relu(self.adapters[2](f2))
+        f2 = self.adapters[2](f2)
         if f2_q: 
             f2 = f2_q
 
         f3 = self.net.layer3(f2)
-        f3 = F.relu(self.adapters[3](f3))
+        f3 = self.adapters[3](f3)
         if f3_q: 
             f3 = f3_q
 
