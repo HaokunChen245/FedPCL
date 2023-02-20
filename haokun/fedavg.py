@@ -71,7 +71,7 @@ class LocalUpdate(object):
                 # loss_ce_2 = self.criterion_CE(logits_2, labels)
                 # logits_3 = model_dg(x=None, f3_q=f3)
                 # loss_ce_3 = self.criterion_CE(logits_3, labels)
-                # loss = loss_ce + loss_ce_2 + loss_ce_3
+                loss = loss_ce #+ loss_ce_2 + loss_ce_3
 
                 optimizer.zero_grad()
                 loss.backward()
