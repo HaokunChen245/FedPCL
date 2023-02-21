@@ -110,7 +110,7 @@ class ResNetWrapper(nn.Module):
 
         for name, m in self.net.named_modules():
             print(name)
-            if 'downstream' in name:
+            if 'downsample' in name:
                 for p in m.parameters():
                     p.requries_grad=True
                     
