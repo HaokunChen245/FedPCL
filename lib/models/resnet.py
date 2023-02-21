@@ -123,7 +123,7 @@ class ResNetWrapper(nn.Module):
                     nn.BatchNorm2d(dims[i]).to('cuda'),
                     nn.ReLU(inplace=True).to('cuda'),
                     conv3x3(dims[i], dims[i]//2).to('cuda'),
-                    nn.BatchNorm2d(dims[i]/2).to('cuda'),
+                    nn.BatchNorm2d(dims[i]//2).to('cuda'),
                     nn.ReLU(inplace=True).to('cuda'),
                     conv3x3(dims[i]//2, dims[i]).to('cuda'),
                 )
