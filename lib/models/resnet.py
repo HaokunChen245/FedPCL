@@ -116,6 +116,7 @@ class ResNetWrapper(nn.Module):
 
         
         dims = [64, 64, 128, 256]
+        self.adapters = []
         for i in range(len(dims)):
             self.adapters.append( 
                 nn.Sequential(
