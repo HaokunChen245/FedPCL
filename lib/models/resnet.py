@@ -108,29 +108,51 @@ class ResNetWrapper(nn.Module):
         for p in self.net.fc.parameters():
             p.requires_grad = True
 
-        for name, m in self.net.named_modules():
-            print(name)
-            if 'downsample' in name:
-                for p in m.parameters():
-                    p.requries_grad=True
+        # for name, m in self.net.named_modules():
+        #     print(name)
+        #     if 'downsample' in name:
+        #         for p in m.parameters():
+        #             p.requries_grad=True
+
+        
+        dims = [64, 64, 128, 256]
+        for i in range(len(dims)):
+            self.adapters.append( 
+                nn.Sequential(
+                    nn.BatchNorm2d(dims[i]).to('cuda'),
+                    nn.ReLU(inplace=True).to('cuda'),
+                    nn.Conv2d(dims[i], dims[i]/2, kernel_size=3, stride=1, padding=1).to('cuda'),
+                    nn.BatchNorm2d(dims[i]/2).to('cuda'),
+                    nn.ReLU(inplace=True).to('cuda'),
+                    nn.Conv2d(dims[i]/2, dims[i], kernel_size=3, stride=1, padding=1).to('cuda'),
+                )
+            )
+        
+        for m in self.adapters:
+            for p in m.parameters():
+                p.requries_grad=True
                     
     def forward(self, x, f0_q=None, f1_q=None, f2_q=None, f3_q=None, get_features=False):
         x = self.net.conv1(x)
         x = self.net.bn1(x)
         x = self.net.relu(x)
         f0 = self.net.maxpool(x)
+        f0 = self.adapters[0](f0) + f0
         if f0_q: 
             f0 = f0_q
 
         f1 = self.net.layer1(f0)
+        f1 = self.adapters[1](f1) + f1
         if f1_q: 
             f1 = f1_q
 
         f2 = self.net.layer2(f1)
+        f2 = self.adapters[2](f2) + f2
         if f2_q: 
             f2 = f2_q
 
         f3 = self.net.layer3(f2)
+        f3 = self.adapters[3](f3) + f3
         if f3_q: 
             f3 = f3_q
 
