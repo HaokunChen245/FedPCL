@@ -104,10 +104,8 @@ class ResNetWrapper(nn.Module):
         self.net.eval()
         for p in self.net.parameters():
             p.requires_grad = False
-
         for p in self.net.fc.parameters():
             p.requires_grad = True
-       
         # dims = [64, 64, 128, 256]
         # self.adapters = []
         # for i in range(len(dims)):
@@ -127,18 +125,23 @@ class ResNetWrapper(nn.Module):
         #         p.requries_grad=True
 
         dims = [64, 64, 128, 256]
-        self.shortcuts = {}
+        self.shortcuts = []
+        self.k_2_module = {}
+        ct = 0
         for i, d_in in enumerate(dims[:-1]):            
             for j, d_out in enumerate(dims):                
                 if i>=j: continue                
-                self.shortcuts[f'{i}_{j}'] = nn.Sequential
+                self.shortcuts.append(nn.Sequential
                 (
                     conv1x1(d_in, d_out).to('cuda'),
                     nn.BatchNorm2d(d_out).to('cuda'),
                 )
+                self.k_2_module[f'{i}_{j}'] = ct
+                ct += 1
+            )
 
-        for k in self.shortcuts.keys():
-            for p in self.shortcuts[k].parameters():
+        for m in self.shortcuts:
+            for p in m.parameters():
                 p.requries_grad=True
         self.relu = nn.ReLU(inplace=True)
                     
@@ -149,18 +152,18 @@ class ResNetWrapper(nn.Module):
         f0 = self.net.maxpool(x)        
 
         f1 = self.net.layer1(f0)
-        f0_1 = self.shortcuts['0_1'](f0)
+        f0_1 = self.shortcuts[self.k_2_module['0_1']](f0)
         f1 = self.relu(f1 + f0_1)        
 
         f2 = self.net.layer2(f1)
-        f0_2 = self.shortcuts['0_2'](f0)
-        f1_2 = self.shortcuts['1_2'](f1)
+        f0_2 = self.shortcuts[self.k_2_module['0_2']](f0)
+        f1_2 = self.shortcuts[self.k_2_module['1_2']](f1)
         f2 = self.relu(f2 + f0_2 + f1_2)       
 
         f3 = self.net.layer3(f2)
-        f0_3 = self.shortcuts['0_3'](f0)
-        f1_3 = self.shortcuts['1_3'](f1)
-        f2_3 = self.shortcuts['2_3'](f2)
+        f0_3 = self.shortcuts[self.k_2_module['0_3']](f0)
+        f1_3 = self.shortcuts[self.k_2_module['1_3']](f1)
+        f2_3 = self.shortcuts[self.k_2_module['2_3']](f2)
         f3 = self.relu(f3 + f0_3 + f1_3 + f2_3) 
 
         x = self.net.layer4(f3)
