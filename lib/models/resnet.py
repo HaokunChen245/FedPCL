@@ -104,8 +104,15 @@ class ResNetWrapper(nn.Module):
         self.net.eval()
         for p in self.net.parameters():
             p.requires_grad = False
+
         for p in self.net.fc.parameters():
             p.requires_grad = True
+
+        for name, m in self.net.named_modules():
+            if 'bn' in name or 'norm' in name:
+                for p in m.parameters():                
+                    p.requires_grad = True
+
         # dims = [64, 64, 128, 256]
         # self.adapters = []
         # for i in range(len(dims)):
@@ -153,19 +160,19 @@ class ResNetWrapper(nn.Module):
         f0 = self.net.maxpool(x)        
 
         f1 = self.net.layer1(f0)
-        f0_1 = self.shortcuts[self.k_2_module['0_1']](f0)
-        f1 = self.relu(f1 + f0_1)        
+        # f0_1 = self.shortcuts[self.k_2_module['0_1']](f0)
+        # f1 = self.relu(f1 + f0_1)        
 
         f2 = self.net.layer2(f1)
         # f0_2 = self.shortcuts[self.k_2_module['0_2']](f0)
-        f1_2 = self.shortcuts[self.k_2_module['1_2']](f1)
-        f2 = self.relu(f2 + f1_2)       
+        # f1_2 = self.shortcuts[self.k_2_module['1_2']](f1)
+        # f2 = self.relu(f2 + f1_2)       
 
         f3 = self.net.layer3(f2)
         # f0_3 = self.shortcuts[self.k_2_module['0_3']](f0)
         # f1_3 = self.shortcuts[self.k_2_module['1_3']](f1)
-        f2_3 = self.shortcuts[self.k_2_module['2_3']](f2)
-        f3 = self.relu(f3 + f2_3) 
+        # f2_3 = self.shortcuts[self.k_2_module['2_3']](f2)
+        # f3 = self.relu(f3 + f2_3) 
 
         x = self.net.layer4(f3)
         x = self.net.avgpool(x)
