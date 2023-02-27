@@ -125,6 +125,7 @@ class ResNetWrapper(nn.Module):
         #         p.requries_grad=True
 
         dims = [64, 64, 128, 256]
+        img_size = 32
         self.shortcuts = []
         self.k_2_module = {}
         ct = 0
@@ -135,6 +136,7 @@ class ResNetWrapper(nn.Module):
                 (
                     conv1x1(d_in, d_out).to('cuda'),
                     nn.BatchNorm2d(d_out).to('cuda'),
+                    nn.AdaptiveMaxPool2d(img_size//(2**(j+1)))
                 ))
                 self.k_2_module[f'{i}_{j}'] = ct
                 ct += 1
