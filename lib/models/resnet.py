@@ -135,7 +135,7 @@ class ResNetWrapper(nn.Module):
                 (
                     conv1x1(d_in, d_out).to('cuda'),
                     nn.BatchNorm2d(d_out).to('cuda'),
-                )
+                ))
                 self.k_2_module[f'{i}_{j}'] = ct
                 ct += 1
             )
