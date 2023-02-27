@@ -125,7 +125,7 @@ class ResNetWrapper(nn.Module):
         #         p.requries_grad=True
 
         dims = [64, 64, 128, 256]
-        img_sizes = [16, 8, 4, 2]
+        img_sizes = [8, 4, 2, 1]
         self.shortcuts = []
         self.k_2_module = {}
         ct = 0
