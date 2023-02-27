@@ -159,7 +159,7 @@ class ResNetWrapper(nn.Module):
         f2 = self.net.layer2(f1)
         # f0_2 = self.shortcuts[self.k_2_module['0_2']](f0)
         f1_2 = self.shortcuts[self.k_2_module['1_2']](f1)
-        f2 = self.relu(f2 +  + f1_2)       
+        f2 = self.relu(f2 + f1_2)       
 
         f3 = self.net.layer3(f2)
         # f0_3 = self.shortcuts[self.k_2_module['0_3']](f0)
