@@ -135,7 +135,7 @@ class ResNetWrapper(nn.Module):
                 self.shortcuts.append(nn.Sequential
                 (
                     conv1x1(d_in, d_out).to('cuda'),
-                    nn.AdaptiveMaxPool2d(img_sizes[j])
+                    nn.AdaptiveMaxPool2d(img_sizes[j]),
                     nn.BatchNorm2d(d_out).to('cuda'),
                 ))
                 self.k_2_module[f'{i}_{j}'] = ct
@@ -159,13 +159,13 @@ class ResNetWrapper(nn.Module):
         f2 = self.net.layer2(f1)
         # f0_2 = self.shortcuts[self.k_2_module['0_2']](f0)
         f1_2 = self.shortcuts[self.k_2_module['1_2']](f1)
-        f2 = self.relu(f2 + f0_2 + f1_2)       
+        f2 = self.relu(f2 +  + f1_2)       
 
         f3 = self.net.layer3(f2)
         # f0_3 = self.shortcuts[self.k_2_module['0_3']](f0)
         # f1_3 = self.shortcuts[self.k_2_module['1_3']](f1)
         f2_3 = self.shortcuts[self.k_2_module['2_3']](f2)
-        f3 = self.relu(f3 + f0_3 + f1_3 + f2_3) 
+        f3 = self.relu(f3 + f2_3) 
 
         x = self.net.layer4(f3)
         x = self.net.avgpool(x)
