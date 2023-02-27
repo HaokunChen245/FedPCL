@@ -138,7 +138,6 @@ class ResNetWrapper(nn.Module):
                 ))
                 self.k_2_module[f'{i}_{j}'] = ct
                 ct += 1
-            )
 
         for m in self.shortcuts:
             for p in m.parameters():
