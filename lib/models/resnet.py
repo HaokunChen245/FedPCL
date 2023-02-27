@@ -108,23 +108,24 @@ class ResNetWrapper(nn.Module):
         for p in self.net.fc.parameters():
             p.requires_grad = True
        
-        # dims = [64, 64, 128, 256]
-        # self.adapters = []
-        # for i in range(len(dims)):
-        #     self.adapters.append( 
-        #         nn.Sequential(
-        #             nn.BatchNorm2d(dims[i]).to('cuda'),
-        #             nn.ReLU(inplace=True).to('cuda'),
-        #             conv3x3(dims[i], dims[i]//2).to('cuda'),
-        #             nn.BatchNorm2d(dims[i]//2).to('cuda'),
-        #             nn.ReLU(inplace=True).to('cuda'),
-        #             conv3x3(dims[i]//2, dims[i]).to('cuda'),
-        #         )
-        #     )
+        dims = [64, 64, 128, 256]
+        self.adapters = []
+        for i in range(len(dims)):
+            self.adapters.append( 
+                nn.Sequential(
+                    nn.BatchNorm2d(dims[i]).to('cuda'),
+                    nn.ReLU(inplace=True).to('cuda'),
+                    conv3x3(dims[i], dims[i]//2).to('cuda'),
+                    nn.BatchNorm2d(dims[i]//2).to('cuda'),
+                    nn.ReLU(inplace=True).to('cuda'),
+                    conv3x3(dims[i]//2, dims[i]).to('cuda'),
+                )
+            )
         
-        # for m in self.adapters:
-        #     for p in m.parameters():
-        #         p.requries_grad=True
+        for m in self.adapters:
+            for p in m.parameters():
+                print(type(m))
+                p.requries_grad=True
 
         dims = [64, 64, 128, 256]
         self.shortcuts = {}
@@ -137,6 +138,7 @@ class ResNetWrapper(nn.Module):
                     nn.BatchNorm2d(d_out),
                 )
         for k in self.shortcuts.keys():
+            print(type(self.shortcuts[k]))
             for p in self.shortcuts[k].parameters():
                 p.requries_grad=True
         self.relu = nn.ReLU(inplace=True)
