@@ -112,6 +112,7 @@ class ResNetWrapper(nn.Module):
             if 'bn' in name or 'norm' in name:
                 for p in m.parameters():                
                     p.requires_grad = True
+                print(name)
 
         # dims = [64, 64, 128, 256]
         # self.adapters = []
