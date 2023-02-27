@@ -107,55 +107,60 @@ class ResNetWrapper(nn.Module):
 
         for p in self.net.fc.parameters():
             p.requires_grad = True
-
-        # for name, m in self.net.named_modules():
-        #     print(name)
-        #     if 'downsample' in name:
-        #         for p in m.parameters():
-        #             p.requries_grad=True
-
+       
+        # dims = [64, 64, 128, 256]
+        # self.adapters = []
+        # for i in range(len(dims)):
+        #     self.adapters.append( 
+        #         nn.Sequential(
+        #             nn.BatchNorm2d(dims[i]).to('cuda'),
+        #             nn.ReLU(inplace=True).to('cuda'),
+        #             conv3x3(dims[i], dims[i]//2).to('cuda'),
+        #             nn.BatchNorm2d(dims[i]//2).to('cuda'),
+        #             nn.ReLU(inplace=True).to('cuda'),
+        #             conv3x3(dims[i]//2, dims[i]).to('cuda'),
+        #         )
+        #     )
         
+        # for m in self.adapters:
+        #     for p in m.parameters():
+        #         p.requries_grad=True
+
         dims = [64, 64, 128, 256]
-        self.adapters = []
-        for i in range(len(dims)):
-            self.adapters.append( 
-                nn.Sequential(
-                    nn.BatchNorm2d(dims[i]).to('cuda'),
-                    nn.ReLU(inplace=True).to('cuda'),
-                    conv3x3(dims[i], dims[i]//2).to('cuda'),
-                    nn.BatchNorm2d(dims[i]//2).to('cuda'),
-                    nn.ReLU(inplace=True).to('cuda'),
-                    conv3x3(dims[i]//2, dims[i]).to('cuda'),
+        self.shortcuts = {}
+        for i, d_in in enumerate(dims[:-1]):            
+            for j, d_out in enumerate(dims):                
+                if i>=j: continue                
+                self.shortcuts[f'{i}_{j}'] = nn.Sequential
+                (
+                    conv1x1(d_in, d_out),
+                    nn.BatchNorm2d(d_out)
                 )
-            )
-        
-        for m in self.adapters:
-            for p in m.parameters():
+        for k in self.shortcuts:
+            for p in self.shortcuts[k].parameters():
                 p.requries_grad=True
+        self.relu = nn.ReLU(inplace=True)
                     
     def forward(self, x, f0_q=None, f1_q=None, f2_q=None, f3_q=None, get_features=False):
         x = self.net.conv1(x)
         x = self.net.bn1(x)
         x = self.net.relu(x)
-        f0 = self.net.maxpool(x)
-        f0 = self.adapters[0](f0) + f0
-        if f0_q: 
-            f0 = f0_q
+        f0 = self.net.maxpool(x)        
 
         f1 = self.net.layer1(f0)
-        f1 = self.adapters[1](f1) + f1
-        if f1_q: 
-            f1 = f1_q
+        f0_1 = self.shortcuts['0_1'](f0)
+        f1 = self.relu(f1 + f0_1)        
 
         f2 = self.net.layer2(f1)
-        f2 = self.adapters[2](f2) + f2
-        if f2_q: 
-            f2 = f2_q
+        f0_2 = self.shortcuts['0_2'](f0)
+        f1_2 = self.shortcuts['1_2'](f1)
+        f2 = self.relu(f2 + f0_2 + f1_2)       
 
         f3 = self.net.layer3(f2)
-        f3 = self.adapters[3](f3) + f3
-        if f3_q: 
-            f3 = f3_q
+        f0_3 = self.shortcuts['0_3'](f0)
+        f1_3 = self.shortcuts['1_3'](f1)
+        f2_3 = self.shortcuts['2_3'](f2)
+        f3 = self.relu(f3 + f0_3 + f1_3 + f2_3) 
 
         x = self.net.layer4(f3)
         x = self.net.avgpool(x)
