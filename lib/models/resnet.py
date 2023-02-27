@@ -136,7 +136,7 @@ class ResNetWrapper(nn.Module):
                     conv1x1(d_in, d_out),
                     nn.BatchNorm2d(d_out)
                 )
-        for k in self.shortcuts:
+        for k in self.shortcuts.keys():
             for p in self.shortcuts[k].parameters():
                 p.requries_grad=True
         self.relu = nn.ReLU(inplace=True)
