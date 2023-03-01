@@ -63,15 +63,9 @@ class LocalUpdate(object):
                 images, labels = images.to(self.device), labels.to(self.device)
 
                 model.zero_grad()                                
-                logits, f0, f1, f2, f3 = model(images, get_features=True)
+                logits = model(images, get_features=False)
                 loss_ce = self.criterion_CE(logits, labels)
-                # logits_0 = model_dg(x=None, f0_q=f0)
-                # logits_1 = model_dg(x=None, f1_q=f1)
-                # logits_2 = model_dg(x=None, f2_q=f2)
-                # loss_ce_2 = self.criterion_CE(logits_2, labels)
-                # logits_3 = model_dg(x=None, f3_q=f3)
-                # loss_ce_3 = self.criterion_CE(logits_3, labels)
-                loss = loss_ce #+ loss_ce_2 + loss_ce_3
+                loss = loss_ce 
 
                 optimizer.zero_grad()
                 loss.backward()
