@@ -102,7 +102,7 @@ class ResNetWrapper(nn.Module):
         super(ResNetWrapper, self).__init__()
         self.nets = nets
         for net_curr in self.nets:
-            net_curr.fc = torch.nn.Identity()
+            net_curr.fc = torch.nn.Identity().to('cuda')
             net_curr.eval()            
             for p in net_curr.parameters():
                 p.requires_grad = False
