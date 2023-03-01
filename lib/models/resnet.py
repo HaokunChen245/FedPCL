@@ -100,19 +100,18 @@ class Bottleneck(nn.Module):
 class ResNetWrapper(nn.Module):
     def __init__(self, net):
         super(ResNetWrapper, self).__init__()
-        self.net = net
-        self.net.eval()
-        for p in self.net.parameters():
+        if not isinstance(net, list):
+            self.net = net
+        net_curr = self.net
+        net_curr.eval()
+        for p in net_curr.parameters():
             p.requires_grad = False
-
-        for p in self.net.fc.parameters():
+        for p in net_curr.fc.parameters():
             p.requires_grad = True
-
-        for name, m in self.net.named_modules():
+        for name, m in net_curr.named_modules():
             if 'bn' in name or 'norm' in name:
                 for p in m.parameters():                
                     p.requires_grad = True
-                print(name)
 
         # dims = [64, 64, 128, 256]
         # self.adapters = []
@@ -132,27 +131,27 @@ class ResNetWrapper(nn.Module):
         #     for p in m.parameters():
         #         p.requries_grad=True
 
-        dims = [64, 64, 128, 256]
-        img_sizes = [16, 16, 8, 4]
-        self.shortcuts = []
-        self.k_2_module = {}
-        ct = 0
-        for i, d_in in enumerate(dims[:-1]):            
-            for j, d_out in enumerate(dims):                
-                if i>=j: continue                
-                self.shortcuts.append(nn.Sequential
-                (
-                    conv1x1(d_in, d_out).to('cuda'),
-                    nn.AdaptiveMaxPool2d(img_sizes[j]),
-                    nn.BatchNorm2d(d_out).to('cuda'),
-                ))
-                self.k_2_module[f'{i}_{j}'] = ct
-                ct += 1
+        # dims = [64, 64, 128, 256]
+        # img_sizes = [16, 16, 8, 4]
+        # self.shortcuts = []
+        # self.k_2_module = {}
+        # ct = 0
+        # for i, d_in in enumerate(dims[:-1]):            
+        #     for j, d_out in enumerate(dims):                
+        #         if i>=j: continue                
+        #         self.shortcuts.append(nn.Sequential
+        #         (
+        #             conv1x1(d_in, d_out).to('cuda'),
+        #             nn.AdaptiveMaxPool2d(img_sizes[j]),
+        #             nn.BatchNorm2d(d_out).to('cuda'),
+        #         ))
+        #         self.k_2_module[f'{i}_{j}'] = ct
+        #         ct += 1
 
-        for m in self.shortcuts:
-            for p in m.parameters():
-                p.requries_grad=True
-        self.relu = nn.ReLU(inplace=True)
+        # for m in self.shortcuts:
+        #     for p in m.parameters():
+        #         p.requries_grad=True
+        # self.relu = nn.ReLU(inplace=True)
                     
     def forward(self, x, f0_q=None, f1_q=None, f2_q=None, f3_q=None, get_features=False):
         x = self.net.conv1(x)
