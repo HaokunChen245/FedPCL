@@ -93,7 +93,6 @@ def main(args):
         vit_b.load_pretrained(args.data_dir + 'weights/B_16-i1k-300ep-lr_0.001-aug_medium2-wd_0.1-do_0.1-sd_0.1.npz')
 
     # model initialization
-    local_model_list = []
     for _ in range(args.num_users):
         if args.num_bb == 1:
             if args.model == 'cnn':
@@ -112,14 +111,13 @@ def main(args):
                 VGG=vgg11(pretrained=True)
                 backbone_list = [MLP, AlexNet, VGG]
                 local_model = ProjandDeci(4352, 256, 10)
-        local_model_list.append(backbone_list)
 
     print(args)
     summary_writer = SummaryWriter('./tensorboard/' + args.dataset + '_' + args.alg + '_' + str(args.rounds) + 'r_' + str(args.num_users) + 'u_'+ str(args.train_ep) + 'ep')
     if args.alg == 'fedavg':
-        acc_mtx = FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_groups, user_groups_test, local_model_list)
+        acc_mtx = FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_groups, user_groups_test, backbone_list)
     elif args.alg == 'local':
-        acc_mtx = Local(args, summary_writer, train_dataset_list, test_dataset_list, user_groups, user_groups_test, local_model_list)
+        acc_mtx = Local(args, summary_writer, train_dataset_list, test_dataset_list, user_groups, user_groups_test, backbone_list)
 
     return acc_mtx
 

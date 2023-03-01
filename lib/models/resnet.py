@@ -101,9 +101,6 @@ class ResNetWrapper(nn.Module):
     def __init__(self, nets, num_classes):
         super(ResNetWrapper, self).__init__()
         self.nets = nets
-        if not isinstance(self.nets, list):
-            self.nets = [self.nets]        
-
         for net_curr in self.nets:
             net_curr.fc = torch.nn.Identity()
             net_curr.eval()            
