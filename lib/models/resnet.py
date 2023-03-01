@@ -98,91 +98,36 @@ class Bottleneck(nn.Module):
         return out
 
 class ResNetWrapper(nn.Module):
-    def __init__(self, net):
+    def __init__(self, nets, num_classes):
         super(ResNetWrapper, self).__init__()
-        if not isinstance(net, list):
-            self.net = net
-        net_curr = self.net
-        net_curr.eval()
-        for p in net_curr.parameters():
-            p.requires_grad = False
-        for p in net_curr.fc.parameters():
+        self.nets = nets
+        if not isinstance(self.nets, list):
+            self.nets = [self.nets]        
+
+        for net_curr in self.nets:
+            net_curr.fc = torch.nn.Identity()
+            net_curr.eval()            
+            for p in net_curr.parameters():
+                p.requires_grad = False
+            for name, m in net_curr.named_modules():
+                if 'bn' in name or 'norm' in name:
+                    for p in m.parameters():                
+                        p.requires_grad = True
+        self.fc = nn.Linear(512 * len(self.nets), num_classes).to('cuda')
+        for p in self.fc.parameters():                
             p.requires_grad = True
-        for name, m in net_curr.named_modules():
-            if 'bn' in name or 'norm' in name:
-                for p in m.parameters():                
-                    p.requires_grad = True
-
-        # dims = [64, 64, 128, 256]
-        # self.adapters = []
-        # for i in range(len(dims)):
-        #     self.adapters.append( 
-        #         nn.Sequential(
-        #             nn.BatchNorm2d(dims[i]).to('cuda'),
-        #             nn.ReLU(inplace=True).to('cuda'),
-        #             conv3x3(dims[i], dims[i]//2).to('cuda'),
-        #             nn.BatchNorm2d(dims[i]//2).to('cuda'),
-        #             nn.ReLU(inplace=True).to('cuda'),
-        #             conv3x3(dims[i]//2, dims[i]).to('cuda'),
-        #         )
-        #     )
+                   
+    def forward(self, x, get_features=False):
+        fs = []
+        for net_curr in self.nets:
+            f = net_curr(x)
+            fs.append(f)
+        fs = torch.cat(fs, 1)     
+        o = self.fc(fs)
         
-        # for m in self.adapters:
-        #     for p in m.parameters():
-        #         p.requries_grad=True
-
-        # dims = [64, 64, 128, 256]
-        # img_sizes = [16, 16, 8, 4]
-        # self.shortcuts = []
-        # self.k_2_module = {}
-        # ct = 0
-        # for i, d_in in enumerate(dims[:-1]):            
-        #     for j, d_out in enumerate(dims):                
-        #         if i>=j: continue                
-        #         self.shortcuts.append(nn.Sequential
-        #         (
-        #             conv1x1(d_in, d_out).to('cuda'),
-        #             nn.AdaptiveMaxPool2d(img_sizes[j]),
-        #             nn.BatchNorm2d(d_out).to('cuda'),
-        #         ))
-        #         self.k_2_module[f'{i}_{j}'] = ct
-        #         ct += 1
-
-        # for m in self.shortcuts:
-        #     for p in m.parameters():
-        #         p.requries_grad=True
-        # self.relu = nn.ReLU(inplace=True)
-                    
-    def forward(self, x, f0_q=None, f1_q=None, f2_q=None, f3_q=None, get_features=False):
-        x = self.net.conv1(x)
-        x = self.net.bn1(x)
-        x = self.net.relu(x)
-        f0 = self.net.maxpool(x)        
-
-        f1 = self.net.layer1(f0)
-        # f0_1 = self.shortcuts[self.k_2_module['0_1']](f0)
-        # f1 = self.relu(f1 + f0_1)        
-
-        f2 = self.net.layer2(f1)
-        # f0_2 = self.shortcuts[self.k_2_module['0_2']](f0)
-        # f1_2 = self.shortcuts[self.k_2_module['1_2']](f1)
-        # f2 = self.relu(f2 + f1_2)       
-
-        f3 = self.net.layer3(f2)
-        # f0_3 = self.shortcuts[self.k_2_module['0_3']](f0)
-        # f1_3 = self.shortcuts[self.k_2_module['1_3']](f1)
-        # f2_3 = self.shortcuts[self.k_2_module['2_3']](f2)
-        # f3 = self.relu(f3 + f2_3) 
-
-        x = self.net.layer4(f3)
-        x = self.net.avgpool(x)
-        x = x.view(x.size(0), -1)
-        o = self.net.fc(x)
-
         if get_features:
-            return o, f0, f1, f2, f3
-        else:
-            return o
+            return o, fs
+        return o
 
 class ResNet(nn.Module):
 

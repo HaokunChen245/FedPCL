@@ -124,7 +124,7 @@ class LocalTest(object):
 
 def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_groups, user_groups_test, local_model_list):
     train_loss, train_accuracy = [], []
-    global_model = ResNetWrapper(local_model_list[0])
+    global_model = ResNetWrapper(local_model_list, args.num_classes)
     global_model.to('cuda')
 
     for round in tqdm(range(args.rounds)):

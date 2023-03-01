@@ -97,13 +97,12 @@ def main(args):
     for _ in range(args.num_users):
         if args.num_bb == 1:
             if args.model == 'cnn':
-                models = resnet_quickdraw
+                backbone_list = [resnet_quickdraw]
             elif args.model == 'vit':
-                models = vit_s
+                backbone_list = [vit_s]
         elif args.num_bb == 3:
             if args.model == 'cnn':
                 backbone_list = [resnet_quickdraw, resnet_aircraft, resnet_birds]
-                local_model = ProjandDeci(512*3, 256, 10)
             elif args.model == 'vit':
                 backbone_list = [vit_t, vit_s, vit_b]
                 local_model = ProjandDeci(192+384+768, 256, 10)
@@ -113,7 +112,7 @@ def main(args):
                 VGG=vgg11(pretrained=True)
                 backbone_list = [MLP, AlexNet, VGG]
                 local_model = ProjandDeci(4352, 256, 10)
-        local_model_list.append(models)
+        local_model_list.append(backbone_list)
 
     print(args)
     summary_writer = SummaryWriter('./tensorboard/' + args.dataset + '_' + args.alg + '_' + str(args.rounds) + 'r_' + str(args.num_users) + 'u_'+ str(args.train_ep) + 'ep')
