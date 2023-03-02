@@ -124,6 +124,8 @@ class ResNetWrapper(nn.Module):
             for p in net_curr.parameters():
                 if p.requires_grad:
                     o.append(p)
+        for p in self.fc.parameters():                
+            o.append(p)
         return o
 
     def forward(self, x, get_features=False):
