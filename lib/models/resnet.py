@@ -108,10 +108,10 @@ class ResNetWrapper(nn.Module):
                 p.requires_grad = False
             # for p in net_curr.fc.parameters():
             #     p.requires_grad = True            
-            for name, m in net_curr.named_modules():
-                if 'bn' in name or 'norm' in name:
-                    for p in m.parameters():                
-                        p.requires_grad = True
+            # for name, m in net_curr.named_modules():
+            #     if 'bn' in name or 'norm' in name:
+            #         for p in m.parameters():                
+            #             p.requires_grad = True
             net_curr.to('cuda')            
         self.fc = nn.Linear(512 * len(self.nets), num_classes).to('cuda')
         # self.fc = nn.Linear(self.nets[0].num_classes * len(self.nets), num_classes).to('cuda')
