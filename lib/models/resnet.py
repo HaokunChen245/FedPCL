@@ -114,20 +114,23 @@ class ResNetWrapper(nn.Module):
                         p.requires_grad = True
             net_curr.to('cuda')            
         # self.fc = nn.Linear(512 * len(self.nets), num_classes).to('cuda')
-        self.fc = nn.Linear(self.nets[0].num_classes * len(self.nets), num_classes).to('cuda')
+        # self.fc = nn.Linear(self.nets[0].num_classes * len(self.nets), num_classes).to('cuda')
         for p in self.fc.parameters():                
             p.requires_grad = True
                    
     def forward(self, x, get_features=False):
-        fs = []
-        for net_curr in self.nets:
-            f = net_curr(x)
-            fs.append(f)
-        fs = torch.cat(fs, 1)     
-        o = self.fc(fs)
+        # fs = []
+        # for net_curr in self.nets:
+        #     f = net_curr(x)
+        #     fs.append(f)
+        # fs = torch.cat(fs, 1)     
+        # o = self.fc(fs)
         
-        if get_features:
-            return o, fs
+        # if get_features:
+        #     return o, fs
+
+        o = self.nets[0](x)
+
         return o
 
 class ResNet(nn.Module):
