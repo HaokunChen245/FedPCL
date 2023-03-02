@@ -102,16 +102,19 @@ class ResNetWrapper(nn.Module):
         super(ResNetWrapper, self).__init__()
         self.nets = nets
         for net_curr in self.nets:
-            net_curr.fc = torch.nn.Identity().to('cuda')
+            # net_curr.fc = torch.nn.Identity().to('cuda')
             net_curr.eval()            
             for p in net_curr.parameters():
                 p.requires_grad = False
+            for p in net_curr.fc.parameters():
+                p.requires_grad = True            
             for name, m in net_curr.named_modules():
                 if 'bn' in name or 'norm' in name:
                     for p in m.parameters():                
                         p.requires_grad = True
-            net_curr.to('cuda')
-        self.fc = nn.Linear(512 * len(self.nets), num_classes).to('cuda')
+            net_curr.to('cuda')            
+        # self.fc = nn.Linear(512 * len(self.nets), num_classes).to('cuda')
+        self.fc = nn.Linear(self.nets[0].num_classes * len(self.nets), num_classes).to('cuda')
         for p in self.fc.parameters():                
             p.requires_grad = True
                    
@@ -143,6 +146,7 @@ class ResNet(nn.Module):
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.num_classes = num_classes
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
