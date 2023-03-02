@@ -115,8 +115,8 @@ class ResNetWrapper(nn.Module):
             net_curr.to('cuda')            
         # self.fc = nn.Linear(512 * len(self.nets), num_classes).to('cuda')
         # self.fc = nn.Linear(self.nets[0].num_classes * len(self.nets), num_classes).to('cuda')
-        for p in self.fc.parameters():                
-            p.requires_grad = True
+        # for p in self.fc.parameters():                
+        #     p.requires_grad = True
                    
     def forward(self, x, get_features=False):
         # fs = []
