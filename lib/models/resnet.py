@@ -101,7 +101,6 @@ class ResNetWrapper(nn.Module):
     def __init__(self, nets, num_classes):
         super(ResNetWrapper, self).__init__()
         self.nets = nets
-        print(nets)
         for net_curr in self.nets:
             # net_curr.fc = torch.nn.Identity().to('cuda')
             net_curr.eval()            
@@ -110,7 +109,6 @@ class ResNetWrapper(nn.Module):
             for p in net_curr.fc.parameters():
                 p.requires_grad = True            
             for name, m in net_curr.named_modules():
-                print(name)
                 if 'bn' in name or 'norm' in name:
                     for p in m.parameters():                
                         p.requires_grad = True
