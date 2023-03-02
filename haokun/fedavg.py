@@ -43,6 +43,7 @@ class LocalUpdate(object):
 
     def update_weights(self, idx, model, global_round):
         # Set mode to train model
+        print(model.parameters())
         model_dg = copy.deepcopy(model)
         model_dg.eval()
         model.train()
