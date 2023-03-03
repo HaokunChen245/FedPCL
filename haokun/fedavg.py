@@ -144,6 +144,7 @@ def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_gro
             local_weights.append(copy.deepcopy(w))
             local_losses.append(copy.deepcopy(loss))
             summary_writer.add_scalar('Train/Loss/user' + str(idx), loss, round)
+            print(w.keys())
 
             global_fcs_new.append(copy.deepcopy(w['fc']))
         global_fcs = global_fcs_new
