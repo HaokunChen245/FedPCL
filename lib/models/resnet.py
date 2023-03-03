@@ -100,8 +100,15 @@ class Bottleneck(nn.Module):
 class ResNetWrapper(nn.Module):
     def __init__(self, nets, num_classes):
         super(ResNetWrapper, self).__init__()
-        self.nets = nets
-        for net_curr in self.nets:
+        if len(nets)==1:
+            self.net0 = nets[0]
+            l = [self.net0]
+        else:
+            self.net0 = nets[0]
+            self.net1 = nets[1]
+            self.net2 = nets[2]
+            l = [self.net0, self.net1, self.net2]
+        for net_curr in l:
             net_curr.fc = torch.nn.Identity().to('cuda')
             net_curr.eval()            
             for p in net_curr.parameters():
@@ -121,8 +128,15 @@ class ResNetWrapper(nn.Module):
 
     def _get_params_train(self):
         o = []
-        for net_curr in self.nets:
-            for p in net_curr.parameters():
+        for p in self.net0.parameters():
+            if p.requires_grad:
+                o.append(p)
+        if hasattr(self, 'net1'):
+            for p in self.net1.parameters():
+                if p.requires_grad:
+                    o.append(p)
+        if hasattr(self, 'net2'):
+            for p in self.net2.parameters():
                 if p.requires_grad:
                     o.append(p)
         for p in self.fc.parameters():                
@@ -130,10 +144,11 @@ class ResNetWrapper(nn.Module):
         return o
 
     def forward(self, x, get_features=False):
-        fs = []
-        for net_curr in self.nets:
-            f = net_curr(x)
-            fs.append(f)
+        fs = [self.net0(x)]
+        if hasattr(self, 'net1'):
+            fs += [self.net1(x)]
+        if hasattr(self, 'net2'):
+            fs += [self.net2(x)]
         fs = torch.cat(fs, 1)     
         o = self.fc(fs)
         
