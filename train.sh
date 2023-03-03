@@ -20,5 +20,5 @@ CUDA_VISIBLE_DEVICES=2 python haokun/main.py --lr 0.01 --alg fedavg --dataset di
 CUDA_VISIBLE_DEVICES=2 python haokun/main.py --lr 0.01 --alg fedavg --dataset digit --num_users 5 --rounds 200 --num_bb 1 --feature_iid 1 --label_iid 0 --alpha 1 >digit_fedavg_filn_1bb_5u_a1_001.log
 CUDA_VISIBLE_DEVICES=2 python haokun/main.py --lr 0.01 --alg fedavg --dataset digit --num_users 5 --rounds 200 --num_bb 1 --feature_iid 0 --label_iid 1 --alpha 1 >digit_fedavg_fnli_1bb_5u_a1_001.log
 
-#only new FC, no local BN at clients
+#both BN and FC are trained and aggregated
 
