@@ -141,7 +141,6 @@ def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_gro
         for idx in range(args.num_users):
             local_node = LocalUpdate(args=args, dataset=train_dataset_list[idx],idxs=user_groups[idx])
             w, loss = local_node.update_weights(idx, model=copy.deepcopy(global_model), global_round=round, global_fcs=global_fcs)
-            print(w.keys())
             local_weights.append(copy.deepcopy(w))
             local_losses.append(copy.deepcopy(loss))
             summary_writer.add_scalar('Train/Loss/user' + str(idx), loss, round)
