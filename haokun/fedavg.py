@@ -41,7 +41,7 @@ class LocalUpdate(object):
 
         return trainloader
 
-    def update_weights(self, idx, model, global_round):
+    def update_weights(self, idx, model, global_round, global_fcs):
         # Set mode to train model
         model_dg = copy.deepcopy(model)
         model_dg.eval()
@@ -63,9 +63,19 @@ class LocalUpdate(object):
                 images, labels = images.to(self.device), labels.to(self.device)
 
                 model.zero_grad()                                
-                logits = model(images, get_features=False)
+                logits, feature = model(images, get_features=True)
+
+                model_dg = copy.deepcopy(model_dg).to('cuda')
+                loss_ce_temp = 0. 
+                for i, fc in enumerate(global_fcs):
+                    if i==idx: continue
+                    model_dg.state_dict()['fc'].data.copy_(fc)
+                    logits_temp = model_dg.fc(feature)
+                    loss_ce_temp += self.criterion_CE(logits, labels)
+                loss_ce_temp /= len(global_fcs) - 1
+
                 loss_ce = self.criterion_CE(logits, labels)
-                loss = loss_ce 
+                loss = loss_ce + loss_ce_temp 
 
                 optimizer.zero_grad()
                 loss.backward()
@@ -121,17 +131,22 @@ def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_gro
     global_model = ResNetWrapper(local_model_list, args.num_classes)
     global_model.to('cuda')
 
+    global_fcs = []
     for round in tqdm(range(args.rounds)):
         local_weights, local_losses = [], []
         print(f'\n | Global Training Round : {round} |\n')
         print(datetime.now())
-
+        
+        global_fcs_new = []
         for idx in range(args.num_users):
             local_node = LocalUpdate(args=args, dataset=train_dataset_list[idx],idxs=user_groups[idx])
-            w, loss = local_node.update_weights(idx, model=copy.deepcopy(global_model), global_round=round)
+            w, loss = local_node.update_weights(idx, model=copy.deepcopy(global_model), global_round=round, global_fcs)
             local_weights.append(copy.deepcopy(w))
             local_losses.append(copy.deepcopy(loss))
             summary_writer.add_scalar('Train/Loss/user' + str(idx), loss, round)
+
+            global_fcs_new.append(copy.deepcopy(w['fc']))
+        global_fcs = global_fcs_new
 
         # update global weights
         local_weights_list = average_weights(local_weights)        
