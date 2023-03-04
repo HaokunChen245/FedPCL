@@ -116,7 +116,6 @@ class ResNetWrapper(nn.Module):
             for name, m in net_curr.named_modules():
                 if 'bn' in name or 'norm' in name:
                     for p in m.parameters():  
-                        print(name, p.shape)              
                         p.requires_grad = True
             net_curr.to('cuda')         
 
@@ -129,6 +128,7 @@ class ResNetWrapper(nn.Module):
         s = 0
         for name, m in self.named_modules():
             for p in m.parameters():  
+                if not p.requires_grad: continue
                 print(name, p.shape)
                 if len(p.shape)==1:
                     s += int(p.shape[0])
