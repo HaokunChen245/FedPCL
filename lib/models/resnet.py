@@ -25,7 +25,7 @@ def conv3x3(in_planes, out_planes, stride=1):
 
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
+    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False).to('cuda')
 
 
 class BasicBlock(nn.Module):
@@ -98,7 +98,7 @@ class Bottleneck(nn.Module):
         return out
 
 class ResNetWrapper(nn.Module):
-    def __init__(self, nets, num_classes):
+    def __init__(self, nets, trainable_params, num_classes):
         super(ResNetWrapper, self).__init__()
         if len(nets)==1:
             self.net0 = nets[0]
@@ -111,19 +111,48 @@ class ResNetWrapper(nn.Module):
 
         for net_curr in l:
             net_curr.fc = torch.nn.Identity().to('cuda')
-            # net_curr.eval()            
-            for p in net_curr.parameters():
-                p.requires_grad = True      
-            for name, m in net_curr.named_modules():
-                if 'bn' in name or 'norm' in name:
-                    for p in m.parameters():  
+            net_curr.eval()            
+            if 'full' in trainable_params:
+                # training the whole backbone
+                net_curr.train()
+                for p in net_curr.parameters():
+                    p.requires_grad = True
+            else:
+                for p in net_curr.parameters():
+                    p.requires_grad = False
+
+            if 'bn' in trainable_params:
+                for name, p in net_curr.named_parameters():
+                    if 'bn' in name or 'norm' in name:
                         p.requires_grad = True
-            net_curr.to('cuda')         
+            net_curr.to('cuda')   
+        
+        if 'adapter' in trainable_params:
+            self._init_adapters()
+            for name, p in self.named_parameters():    
+                if 'adapter' in name:  
+                    p.requires_grad = True
 
         self.fc = nn.Linear(512 * len(l), num_classes).to('cuda')
-        # self.fc = nn.Linear(self.nets[0].num_classes * len(self.nets), num_classes).to('cuda')
         for p in self.fc.parameters():                
             p.requires_grad = True
+
+    def _init_adapters(self):
+        planes = [64, 64, 128, 256]
+        self.adapters0_0 = nn.Sequential(conv1x1(planes[0], p[0]), nn.BatchNorm2d(p[0]).to('cuda'))
+        self.adapters0_1 = nn.Sequential(conv1x1(planes[1], p[1]), nn.BatchNorm2d(p[1]).to('cuda'))
+        self.adapters0_2 = nn.Sequential(conv1x1(planes[2], p[2]), nn.BatchNorm2d(p[2]).to('cuda'))
+        self.adapters0_3 = nn.Sequential(conv1x1(planes[3], p[3]), nn.BatchNorm2d(p[3]).to('cuda'))
+        if hasattr(self, 'net1'):
+            self.adapters1_0 = nn.Sequential(conv1x1(planes[0], p[0]), nn.BatchNorm2d(p[0]).to('cuda'))
+            self.adapters1_1 = nn.Sequential(conv1x1(planes[1], p[1]), nn.BatchNorm2d(p[1]).to('cuda'))
+            self.adapters1_2 = nn.Sequential(conv1x1(planes[2], p[2]), nn.BatchNorm2d(p[2]).to('cuda'))
+            self.adapters1_3 = nn.Sequential(conv1x1(planes[3], p[3]), nn.BatchNorm2d(p[3]).to('cuda'))
+        if hasattr(self, 'net2'):
+            self.adapters2_0 = nn.Sequential(conv1x1(planes[0], p[0]), nn.BatchNorm2d(p[0]).to('cuda'))
+            self.adapters2_1 = nn.Sequential(conv1x1(planes[1], p[1]), nn.BatchNorm2d(p[1]).to('cuda'))
+            self.adapters2_2 = nn.Sequential(conv1x1(planes[2], p[2]), nn.BatchNorm2d(p[2]).to('cuda'))
+            self.adapters2_3 = nn.Sequential(conv1x1(planes[3], p[3]), nn.BatchNorm2d(p[3]).to('cuda'))
 
     def _get_trainable_params_count(self):
         s = 0
@@ -138,12 +167,50 @@ class ResNetWrapper(nn.Module):
                 s += t
         return s
 
+    def _forward_with_adapters(self, net, x, adapters):
+        x = net.conv1(x)
+        x = net.bn1(x)
+        x = net.relu(x)
+        x = net.maxpool(x)
+        x = x + adapters[0](x)
+
+        x = net.layer1(x)
+        x = x + adapters[1](x)
+        x = net.layer2(x)
+        x = x + adapters[2](x)
+        x = net.layer3(x)
+        x = x + adapters[3](x)
+        x = net.layer4(x)
+
+        x = net.avgpool(x)
+        x = x.view(x.size(0), -1)
+        o = net.fc(x)
+        return o
+
     def forward(self, x, get_features=False):
-        fs = [self.net0(x)]
+        if hasattr(self, 'adapters0_0'):
+            fs = [self._forward_with_adapters(self.net0, x, [
+                self.adapters0_0, self.adapters0_1, self.adapters0_2, self.adapters0_3
+            ])]
+        else:
+            fs = [self.net0(x)]
+
         if hasattr(self, 'net1'):
-            fs += [self.net1(x)]
+            if hasattr(self, 'adapters1_0'):
+                fs += [self._forward_with_adapters(self.net1, x, [
+                    self.adapters1_0, self.adapters1_1, self.adapters1_2, self.adapters1_3
+                ])]
+            else:
+                fs += [self.net1(x)]
+
         if hasattr(self, 'net2'):
-            fs += [self.net2(x)]
+            if hasattr(self, 'adapters2_0'):
+                fs += [self._forward_with_adapters(self.net2, x, [
+                    self.adapters2_0, self.adapters2_1, self.adapters2_2, self.adapters2_3
+                ])]
+            else:
+                fs += [self.net2(x)]
+
         fs = torch.cat(fs, 1)     
         o = self.fc(fs)
         
