@@ -128,7 +128,7 @@ class ResNetWrapper(nn.Module):
         s = 0
         for p in self.parameters():
             if p.requires_grad:
-                s += torch.prod(p.shape)
+                s += torch.prod(torch.Tensor(p.shape))
         return s
 
     def forward(self, x, get_features=False):
