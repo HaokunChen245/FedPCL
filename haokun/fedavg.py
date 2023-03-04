@@ -128,7 +128,7 @@ class LocalTest(object):
 
 def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_groups, user_groups_test, local_model_list):
     train_loss, train_accuracy = [], []
-    global_model = ResNetWrapper(local_model_list, args.num_classes)
+    global_model = ResNetWrapper(local_model_list, args.num_classes, 'adapter')
     global_model.to('cuda')
     print(global_model._get_trainable_params_count())
 
