@@ -126,17 +126,16 @@ class ResNetWrapper(nn.Module):
 
     def _get_trainable_modules(self):
         s = 0
-        for name, m in self.named_modules():
-            for p in m.parameters():  
-                if not p.requires_grad: continue
-                print(name, p.shape)
-                if len(p.shape)==1:
-                    s += int(p.shape[0])
-                else:
-                    t = 1
-                    for i in list(p.shape):
-                        t *= i
-                    s += t
+        for name, p in self.named_parameters():
+            if not p.requires_grad: continue
+            print(name, p.shape)
+            if len(p.shape)==1:
+                s += int(p.shape[0])
+            else:
+                t = 1
+                for i in list(p.shape):
+                    t *= i
+                s += t
         return s
 
     def forward(self, x, get_features=False):
