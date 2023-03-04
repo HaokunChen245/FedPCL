@@ -138,21 +138,21 @@ class ResNetWrapper(nn.Module):
             p.requires_grad = True
 
     def _init_adapters(self):
-        planes = [64, 64, 128, 256]
-        self.adapters0_0 = nn.Sequential(conv1x1(planes[0], p[0]), nn.BatchNorm2d(p[0]).to('cuda'))
-        self.adapters0_1 = nn.Sequential(conv1x1(planes[1], p[1]), nn.BatchNorm2d(p[1]).to('cuda'))
-        self.adapters0_2 = nn.Sequential(conv1x1(planes[2], p[2]), nn.BatchNorm2d(p[2]).to('cuda'))
-        self.adapters0_3 = nn.Sequential(conv1x1(planes[3], p[3]), nn.BatchNorm2d(p[3]).to('cuda'))
+        p = [64, 64, 128, 256]
+        self.adapters0_0 = nn.Sequential(conv1x1(p[0], p[0]), nn.BatchNorm2d(p[0]).to('cuda'))
+        self.adapters0_1 = nn.Sequential(conv1x1(p[1], p[1]), nn.BatchNorm2d(p[1]).to('cuda'))
+        self.adapters0_2 = nn.Sequential(conv1x1(p[2], p[2]), nn.BatchNorm2d(p[2]).to('cuda'))
+        self.adapters0_3 = nn.Sequential(conv1x1(p[3], p[3]), nn.BatchNorm2d(p[3]).to('cuda'))
         if hasattr(self, 'net1'):
-            self.adapters1_0 = nn.Sequential(conv1x1(planes[0], p[0]), nn.BatchNorm2d(p[0]).to('cuda'))
-            self.adapters1_1 = nn.Sequential(conv1x1(planes[1], p[1]), nn.BatchNorm2d(p[1]).to('cuda'))
-            self.adapters1_2 = nn.Sequential(conv1x1(planes[2], p[2]), nn.BatchNorm2d(p[2]).to('cuda'))
-            self.adapters1_3 = nn.Sequential(conv1x1(planes[3], p[3]), nn.BatchNorm2d(p[3]).to('cuda'))
+            self.adapters1_0 = nn.Sequential(conv1x1(p[0], p[0]), nn.BatchNorm2d(p[0]).to('cuda'))
+            self.adapters1_1 = nn.Sequential(conv1x1(p[1], p[1]), nn.BatchNorm2d(p[1]).to('cuda'))
+            self.adapters1_2 = nn.Sequential(conv1x1(p[2], p[2]), nn.BatchNorm2d(p[2]).to('cuda'))
+            self.adapters1_3 = nn.Sequential(conv1x1(p[3], p[3]), nn.BatchNorm2d(p[3]).to('cuda'))
         if hasattr(self, 'net2'):
-            self.adapters2_0 = nn.Sequential(conv1x1(planes[0], p[0]), nn.BatchNorm2d(p[0]).to('cuda'))
-            self.adapters2_1 = nn.Sequential(conv1x1(planes[1], p[1]), nn.BatchNorm2d(p[1]).to('cuda'))
-            self.adapters2_2 = nn.Sequential(conv1x1(planes[2], p[2]), nn.BatchNorm2d(p[2]).to('cuda'))
-            self.adapters2_3 = nn.Sequential(conv1x1(planes[3], p[3]), nn.BatchNorm2d(p[3]).to('cuda'))
+            self.adapters2_0 = nn.Sequential(conv1x1(p[0], p[0]), nn.BatchNorm2d(p[0]).to('cuda'))
+            self.adapters2_1 = nn.Sequential(conv1x1(p[1], p[1]), nn.BatchNorm2d(p[1]).to('cuda'))
+            self.adapters2_2 = nn.Sequential(conv1x1(p[2], p[2]), nn.BatchNorm2d(p[2]).to('cuda'))
+            self.adapters2_3 = nn.Sequential(conv1x1(p[3], p[3]), nn.BatchNorm2d(p[3]).to('cuda'))
 
     def _get_trainable_params_count(self):
         s = 0
