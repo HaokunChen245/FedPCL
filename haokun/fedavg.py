@@ -130,6 +130,8 @@ def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_gro
     train_loss, train_accuracy = [], []
     global_model = ResNetWrapper(local_model_list, args.num_classes)
     global_model.to('cuda')
+    print(global_model._get_trainable_modules())
+    return
 
     global_fcs = []
     for round in tqdm(range(args.rounds)):
@@ -137,15 +139,12 @@ def FedAvg(args, summary_writer, train_dataset_list, test_dataset_list, user_gro
         print(f'\n | Global Training Round : {round} |\n')
         print(datetime.now())
         
-        global_fcs_new = []
         for idx in range(args.num_users):
             local_node = LocalUpdate(args=args, dataset=train_dataset_list[idx],idxs=user_groups[idx])
             w, loss = local_node.update_weights(idx, model=copy.deepcopy(global_model), global_round=round, global_fcs=global_fcs)
             local_weights.append(copy.deepcopy(w))
             local_losses.append(copy.deepcopy(loss))
             summary_writer.add_scalar('Train/Loss/user' + str(idx), loss, round)
-            # global_fcs_new.append(w['fc']))
-        global_fcs = global_fcs_new
 
         # update global weights
         local_weights_list = average_weights(local_weights)        

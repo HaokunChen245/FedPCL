@@ -112,9 +112,7 @@ class ResNetWrapper(nn.Module):
             net_curr.fc = torch.nn.Identity().to('cuda')
             net_curr.eval()            
             for p in net_curr.parameters():
-                p.requires_grad = False
-            for p in net_curr.fc.parameters():
-                p.requires_grad = True            
+                p.requires_grad = False            
             for name, m in net_curr.named_modules():
                 if 'bn' in name or 'norm' in name:
                     for p in m.parameters():                
@@ -125,6 +123,13 @@ class ResNetWrapper(nn.Module):
         # self.fc = nn.Linear(self.nets[0].num_classes * len(self.nets), num_classes).to('cuda')
         for p in self.fc.parameters():                
             p.requires_grad = True
+
+    def _get_trainable_modules(self):
+        s = 0
+        for p in self.parameters():
+            if p.requires_grad:
+                s += torch.prod(p.shape)
+        return s
 
     def forward(self, x, get_features=False):
         fs = [self.net0(x)]
