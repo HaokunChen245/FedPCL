@@ -98,7 +98,7 @@ class Bottleneck(nn.Module):
         return out
 
 class ResNetWrapper(nn.Module):
-    def __init__(self, nets, trainable_params, num_classes):
+    def __init__(self, nets, num_classes, trainable_params):
         super(ResNetWrapper, self).__init__()
         if len(nets)==1:
             self.net0 = nets[0]
