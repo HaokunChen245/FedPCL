@@ -27,6 +27,7 @@ def args_parser():
     # model arguments
     parser.add_argument('--model', type=str, default='cnn', help='model name') #cnn
     parser.add_argument('--num_bb', type=int, default=3, help='number of backbone')
+    parser.add_argument('--train_method', type=str, required=True)
 
     # data arguments
     parser.add_argument('--dataset', type=str, default='digit', help="name of dataset, e.g. digit")
